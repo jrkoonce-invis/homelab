@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: stats-db
+  namespace: stats
+spec:
+  clusterIP: None              # "headless" service: required by StatefulSets (explained below)
+  selector:
+    app: stats-db
+  ports:
+    - port: 5432
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: stats-db
+  namespace: stats
+spec:
+  serviceName: stats-db
+  replicas: 1
+  selector:
+    matchLabels:
+      app: stats-db
+  template:
+    metadata:
+      labels:
+        app: stats-db
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:17-alpine
+          envFrom:
+            - secretRef:
+                name: stats-db         # loads POSTGRES_USER, POSTGRES_DB, POSTGRES_PASSWORD
+          env:
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          ports:
+            - containerPort: 5432
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              memory: 512Mi
+          readinessProbe:
+            exec:
+              command: ["sh", "-c", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"]
+            periodSeconds: 10
+          livenessProbe:
+            exec:
+              command: ["sh", "-c", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"]
+            initialDelaySeconds: 30
+            periodSeconds: 30
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi

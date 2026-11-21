@@ -16,6 +16,9 @@ spec:
       containers:
         - name: personal-site
           image: personal-site:dev
+          env:
+            - name: STATS_API_URL
+              value: http://stats-api.stats.svc.cluster.local/api/stats
           ports:
             - containerPort: 3000
           resources:

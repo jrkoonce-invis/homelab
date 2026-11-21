@@ -16,7 +16,7 @@ spec:
       serviceAccountName: stats-api
       containers:
         - name: stats-api
-          image: stats-api:0.1
+          image: stats-api:dev
           ports:
             - containerPort: 8080
           resources:

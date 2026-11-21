@@ -26,13 +26,13 @@ spec:
               memory: 512Mi
           readinessProbe:
             httpGet:
-              path: /ladybug/favicon-32.png
+              path: /api/health
               port: 3000
             initialDelaySeconds: 5
             periodSeconds: 10
           livenessProbe:
             httpGet:
-              path: /ladybug/favicon-32.png
+              path: /api/health
               port: 3000
             initialDelaySeconds: 15
             periodSeconds: 20

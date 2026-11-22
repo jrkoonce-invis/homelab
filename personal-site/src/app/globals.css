@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+    --bg: #0c0c0a;
+    --fg: #fcfcf6;
+    --muted: rgb(252 252 246 / 0.7);
+  }
+
+  body {
+    margin: 0;
+    font-family: var(--font-jetbrains-mono), "Courier New", monospace;
+    font-weight: 300;
+    background: var(--bg);
+    color: var(--fg);
+    line-height: 1.6;
+  }
+}

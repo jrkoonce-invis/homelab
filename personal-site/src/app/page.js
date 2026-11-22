@@ -20,6 +20,7 @@ const photoStack = [
   { color: "/framer/photo-3.jpg", halftone: "/framer/photo-3-halftone.png" },
 ];
 
+// Fallback used when the stats API isn't available (e.g. on Vercel)
 async function getLeetCodeSolvedCount(username) {
   try {
     const res = await fetch("https://leetcode.com/graphql", {
@@ -62,6 +63,7 @@ async function getHomelabStats() {
   }
 }
 
+// "3d 4h", "2h 15m", "7m": time elapsed since an ISO timestamp
 function formatUptime(isoTimestamp) {
   if (!isoTimestamp) return null;
   const totalMinutes = Math.floor((Date.now() - new Date(isoTimestamp).getTime()) / 60000);
@@ -75,9 +77,12 @@ function formatUptime(isoTimestamp) {
 
 export default async function Home() {
   const stats = await getHomelabStats();
-  const leetcodeSolved = stats?.leetcodeSolved ?? (await getLeetCodeSolvedCount(LEETCODE_USERNAME));
+  const leetcodeSolved =
+    stats?.leetcodeSolved ?? (await getLeetCodeSolvedCount(LEETCODE_USERNAME));
   const cluster = stats?.cluster ?? null;
   const siteUptime = formatUptime(cluster?.site?.runningSince);
+  const uptime = stats?.uptime ?? null;
+
   return (
     <main className="mx-auto flex max-w-[720px] flex-col gap-12 px-6 py-16 md:flex-row md:items-start md:gap-[50px] md:px-10 md:py-20">
       <div className="hidden shrink-0 flex-col gap-[10px] md:flex">
@@ -162,20 +167,35 @@ export default async function Home() {
           </div>
         </div>
 
-        {cluster && (
+        {(cluster || uptime) && (
           <div className="flex flex-col gap-4">
             <p>This Site</p>
             <div className="flex flex-col gap-1">
-              <p className="md:whitespace-nowrap">
-                -&gt; Self-hosted on a {cluster.nodes}-node Kubernetes cluster
-              </p>
-              <p className="md:whitespace-nowrap">
-                -&gt; {cluster.podsRunning} pods running across the homelab
-              </p>
-              {cluster.site && (
+              {cluster && (
+                <>
+                  <p className="md:whitespace-nowrap">
+                    -&gt; Self-hosted on a {cluster.nodes}-node Kubernetes cluster
+                  </p>
+                  <p className="md:whitespace-nowrap">
+                    -&gt; {cluster.podsRunning} pods running across the homelab
+                  </p>
+                  {cluster.site && (
+                    <p className="md:whitespace-nowrap">
+                      -&gt; {cluster.site.replicasReady}/{cluster.site.replicasDesired} replicas
+                      healthy{siteUptime && `, up for ${siteUptime}`}
+                    </p>
+                  )}
+                </>
+              )}
+              {uptime?.last7d != null && (
                 <p className="md:whitespace-nowrap">
-                  -&gt; {cluster.site.replicasReady}/{cluster.site.replicasDesired} replicas
-                  healthy{siteUptime && `, up for ${siteUptime}`}
+                  -&gt; {uptime.last7d}% uptime over the last 7 days
+                </p>
+              )}
+              {uptime?.lastCheck && (
+                <p className="md:whitespace-nowrap">
+                  -&gt; Last checked {formatUptime(uptime.lastCheck.checkedAt)} ago
+                  {uptime.lastCheck.up ? ` (${uptime.lastCheck.responseMs}ms)` : " (down)"}
                 </p>
               )}
             </div>

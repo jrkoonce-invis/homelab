@@ -17,6 +17,19 @@ spec:
       containers:
         - name: stats-api
           image: stats-api:dev
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://stats-db.stats.svc.cluster.local:5432/stats
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: stats-db
+                  key: POSTGRES_USER
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: stats-db
+                  key: POSTGRES_PASSWORD
           ports:
             - containerPort: 8080
           resources:

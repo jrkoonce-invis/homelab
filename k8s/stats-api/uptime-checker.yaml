@@ -1,0 +1,40 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: uptime-checker
+  namespace: stats
+spec:
+  schedule: "* * * * *"             # every minute
+  concurrencyPolicy: Forbid          # never run two checks at once
+  successfulJobsHistoryLimit: 3      # keep only the last 3 finished jobs
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 0                # if a check fails, don't retry; the next minute will check again
+      activeDeadlineSeconds: 50      # kill a check that's still running after 50s
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: checker
+              image: uptime-checker:dev
+              env:
+                - name: TARGET_URL
+                  value: https://new.jamesonkoonce.com/api/health
+                - name: PGHOST
+                  value: stats-db.stats.svc.cluster.local
+                - name: PGDATABASE
+                  valueFrom:
+                    secretKeyRef: { name: stats-db, key: POSTGRES_DB }
+                - name: PGUSER
+                  valueFrom:
+                    secretKeyRef: { name: stats-db, key: POSTGRES_USER }
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef: { name: stats-db, key: POSTGRES_PASSWORD }
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 16Mi
+                limits:
+                  memory: 64Mi

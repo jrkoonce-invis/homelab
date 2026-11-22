@@ -71,25 +71,25 @@ export default async function Home() {
   const uptime = stats?.uptime ?? null;
 
   return (
-    <main className="mx-auto flex max-w-[720px] flex-col gap-12 px-6 py-16 md:flex-row md:items-start md:gap-[50px] md:px-10 md:py-20">
+    <main className="mx-auto flex max-w-[740px] flex-col gap-12 px-6 py-16 md:flex-row md:items-start md:gap-[50px] md:px-10 md:py-20">
       <div className="hidden shrink-0 flex-col gap-[10px] md:flex">
         {photoStack.map((photo) => (
           <div
             key={photo.color}
-            className="group relative h-[200px] w-[200px] overflow-hidden"
+            className="group relative h-[228px] w-[228px] overflow-hidden"
           >
             <Image
               src={photo.halftone}
               alt=""
               fill
-              sizes="200px"
+              sizes="228px"
               className="object-cover opacity-100 transition-opacity duration-300 group-hover:opacity-0"
             />
             <Image
               src={photo.color}
               alt=""
               fill
-              sizes="200px"
+              sizes="228px"
               className="object-cover opacity-0 transition-opacity duration-300 group-hover:opacity-100"
             />
           </div>
@@ -127,14 +127,14 @@ export default async function Home() {
           <div className="flex flex-col gap-4">
             <p>This Site</p>
             <div className="flex flex-col gap-1">
-              <p>-&gt; Self-hosted on my homelab k8s cluster</p>
+              <p>-&gt; Self-hosted on homelab k8s cluster</p>
               {cluster && (
                 <p>
                   -&gt; {cluster.podsRunning} pods running
                   {uptime?.last7d != null && `, ${uptime.last7d}% uptime (7d)`}
                 </p>
               )}
-              <p>-&gt; Next.js, Spring Boot, Postgres, Cloudflare Tunnel</p>
+              <p className="pl-[3ch] -indent-[3ch]">-&gt; Next.js, Spring Boot, Postgres, Cloudflare Tunnel</p>
             </div>
           </div>
         )}

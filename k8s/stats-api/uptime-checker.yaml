@@ -6,8 +6,8 @@ metadata:
 spec:
   schedule: "* * * * *"             # every minute
   concurrencyPolicy: Forbid          # never run two checks at once
-  successfulJobsHistoryLimit: 3      # keep only the last 3 finished jobs
-  failedJobsHistoryLimit: 3
+  successfulJobsHistoryLimit: 1      # keep only the last 3 finished jobs
+  failedJobsHistoryLimit: 1
   jobTemplate:
     spec:
       backoffLimit: 0                # if a check fails, don't retry; the next minute will check again
@@ -20,7 +20,7 @@ spec:
               image: uptime-checker:dev
               env:
                 - name: TARGET_URL
-                  value: https://new.jamesonkoonce.com/api/health
+                  value: https://homelab.jamesonkoonce.com/api/health
                 - name: PGHOST
                   value: stats-db.stats.svc.cluster.local
                 - name: PGDATABASE

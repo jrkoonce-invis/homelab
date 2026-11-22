@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: personal-site
-          image: personal-site:dev
+          image: personal-site:0.3
           env:
             - name: STATS_API_URL
               value: http://stats-api.stats.svc.cluster.local/api/stats

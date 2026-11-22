@@ -63,24 +63,11 @@ async function getHomelabStats() {
   }
 }
 
-// "3d 4h", "2h 15m", "7m": time elapsed since an ISO timestamp
-function formatUptime(isoTimestamp) {
-  if (!isoTimestamp) return null;
-  const totalMinutes = Math.floor((Date.now() - new Date(isoTimestamp).getTime()) / 60000);
-  const days = Math.floor(totalMinutes / 1440);
-  const hours = Math.floor((totalMinutes % 1440) / 60);
-  const minutes = totalMinutes % 60;
-  if (days > 0) return `${days}d ${hours}h`;
-  if (hours > 0) return `${hours}h ${minutes}m`;
-  return `${minutes}m`;
-}
-
 export default async function Home() {
   const stats = await getHomelabStats();
   const leetcodeSolved =
     stats?.leetcodeSolved ?? (await getLeetCodeSolvedCount(LEETCODE_USERNAME));
   const cluster = stats?.cluster ?? null;
-  const siteUptime = formatUptime(cluster?.site?.runningSince);
   const uptime = stats?.uptime ?? null;
 
   return (
@@ -136,6 +123,22 @@ export default async function Home() {
           </p>
         </div>
 
+        {(cluster || uptime) && (
+          <div className="flex flex-col gap-4">
+            <p>This Site</p>
+            <div className="flex flex-col gap-1">
+              <p>-&gt; Self-hosted on my homelab k8s cluster</p>
+              {cluster && (
+                <p>
+                  -&gt; {cluster.podsRunning} pods running
+                  {uptime?.last7d != null && `, ${uptime.last7d}% uptime (7d)`}
+                </p>
+              )}
+              <p>-&gt; Next.js, Spring Boot, Postgres, Cloudflare Tunnel</p>
+            </div>
+          </div>
+        )}
+
         <div className="flex flex-col gap-4">
           <p>This Year</p>
           <div className="flex flex-col gap-1">
@@ -167,47 +170,12 @@ export default async function Home() {
           </div>
         </div>
 
-        {(cluster || uptime) && (
-          <div className="flex flex-col gap-4">
-            <p>This Site</p>
-            <div className="flex flex-col gap-1">
-              {cluster && (
-                <>
-                  <p className="md:whitespace-nowrap">
-                    -&gt; Self-hosted on a {cluster.nodes}-node Kubernetes cluster
-                  </p>
-                  <p className="md:whitespace-nowrap">
-                    -&gt; {cluster.podsRunning} pods running across the homelab
-                  </p>
-                  {cluster.site && (
-                    <p className="md:whitespace-nowrap">
-                      -&gt; {cluster.site.replicasReady}/{cluster.site.replicasDesired} replicas
-                      healthy{siteUptime && `, up for ${siteUptime}`}
-                    </p>
-                  )}
-                </>
-              )}
-              {uptime?.last7d != null && (
-                <p className="md:whitespace-nowrap">
-                  -&gt; {uptime.last7d}% uptime over the last 7 days
-                </p>
-              )}
-              {uptime?.lastCheck && (
-                <p className="md:whitespace-nowrap">
-                  -&gt; Last checked {formatUptime(uptime.lastCheck.checkedAt)} ago
-                  {uptime.lastCheck.up ? ` (${uptime.lastCheck.responseMs}ms)` : " (down)"}
-                </p>
-              )}
-            </div>
-          </div>
-        )}
-
         <div className="flex flex-col gap-4">
           <p>Contact</p>
-          <div className="flex flex-col items-start">
+          <div className="flex flex-wrap gap-x-4 gap-y-1">
             {contactLinks.map((link) => (
               <a key={link.label} href={link.href} className="underline" {...EXTERNAL_LINK_PROPS}>
-                -&gt; {link.label}
+                {link.label}
               </a>
             ))}
           </div>

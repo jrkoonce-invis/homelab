@@ -16,7 +16,7 @@ spec:
                 name: personal-site
                 port:
                   number: 80
-    - host: new.jamesonkoonce.com
+    - host: homelab.jamesonkoonce.com
       http:
         paths:
           - path: /
